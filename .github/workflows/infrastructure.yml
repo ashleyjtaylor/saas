@@ -1,0 +1,52 @@
+name: infrastructure
+
+env:
+  NODE_VERSION: 20
+  OIDC_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/saas-github-oidc-provider-role
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+      - '!**/*.md'
+
+jobs:
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        working-directory: ./infrastructure
+        run: |
+          npm run lint
+          npm run build
+
+      - name: Assume OIDC Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: gh-infrastructure-deploy-session
+          role-to-assume: ${{ env.OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Synth
+        working-directory: ./infrastructure
+        run: cdk synth --require-approval never
+
+      - name: Deploy
+        working-directory: ./infrastructure
+        run: cdk deploy  --require-approval never

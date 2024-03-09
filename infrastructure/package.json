@@ -1,0 +1,19 @@
+{
+  "name": "infrastructure",
+  "version": "0.1.0",
+  "bin": {
+    "infrastructure": "bin/infrastructure.js"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "build": "tsc -p .",
+    "cdk-init": "cdk deploy ToolsStack",
+    "cdk-synth": "cdk synth",
+    "cdk-deploy": "cdk deploy"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.132.0",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}

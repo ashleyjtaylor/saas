@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "display": "CDK",
+  "compilerOptions": {
+    "inlineSourceMap": false,
+    "inlineSources": false
+  }
+}
