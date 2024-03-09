@@ -72,13 +72,14 @@ export default class OIDCProvider extends Construct {
               actions: [
                 'ecr:DescribeImages',
                 'ecr:DescribeRepositories',
+                'ecr:CreateRepository',
                 'ecr:CompleteLayerUpload',
                 'ecr:UploadLayerPart',
                 'ecr:InitiateLayerUpload',
                 'ecr:BatchCheckLayerAvailability',
                 'ecr:PutImage'
               ],
-              resources: [`arn:aws:ecr:::repository/${project}-dev-*`],
+              resources: [`arn:aws:ecr:::repository/${project}-*`],
               effect: Effect.ALLOW
             })
           ]
