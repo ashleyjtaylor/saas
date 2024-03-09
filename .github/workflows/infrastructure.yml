@@ -47,7 +47,7 @@ jobs:
       - name: Assume OIDC Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-session-name: gh-infrastructure-deploy-session
+          # role-session-name: gh-infrastructure-deploy-session
           role-to-assume: ${{ env.OIDC_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
       
