@@ -1,0 +1,33 @@
+{
+  "name": "@saas/root",
+  "private": true,
+  "description": "",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "infrastructure"
+  ],
+  "scripts": {
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "build": "turbo build",
+    "clean": "rm -rf node_modules **/*/dist **/*/.next **/*cdk.out",
+    "prepare": "husky"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.3",
+    "@commitlint/config-conventional": "^19.0.3",
+    "@types/eslint": "^8.56.5",
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.64",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "aws-cdk": "^2.132.0",
+    "eslint": "^8.57.0",
+    "husky": "^9.0.11",
+    "ts-node": "^10.9.2",
+    "turbo": "^1.12.5",
+    "typescript": "^5.4.2"
+  }
+}

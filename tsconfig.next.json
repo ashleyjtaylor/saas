@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "display": "Next.js",
+  "compilerOptions": {
+    "types": ["react"],
+    "plugins": [{ "name": "next" }],
+    "jsx": "preserve",
+    "noEmit": true,
+    "allowJs": true,
+    "incremental": true
+  }
+}
