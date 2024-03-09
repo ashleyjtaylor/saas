@@ -70,6 +70,8 @@ export default class OIDCProvider extends Construct {
             new PolicyStatement({
               sid: 'CdkEcrPermissions',
               actions: [
+                'ecr:DescribeImages',
+                'ecr:DescribeRepositories',
                 'ecr:CompleteLayerUpload',
                 'ecr:UploadLayerPart',
                 'ecr:InitiateLayerUpload',
