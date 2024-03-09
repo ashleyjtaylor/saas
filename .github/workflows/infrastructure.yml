@@ -3,7 +3,6 @@ name: infrastructure
 env:
   NODE_VERSION: 20
   OIDC_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/saas-github-oidc-provider-role
-  # ECR_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 permissions:
   id-token: write
@@ -60,21 +59,13 @@ jobs:
         if: ${{ steps.filter.outputs.images == 'true' }}
         working-directory: ./infrastructure
         run: |
-          # aws --version
-          # aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
-          aws ecr describe-repositories --repository-names base || aws ecr create-repository --repository-name base
-
-          # REPOSITORY_URI=${{ env.ECR_URI }}/base
-
-          # docker build -t $REPOSITORY_URI:latest -f ./src/images/Dockerfile.base .
-          # docker tag base:latest $REPOSITORY_URI:latest
-          # docker push $REPOSITORY_URI:latest
+          aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
 
           docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .
           docker push $REGISTRY/$REPOSITORY:latest
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: base  
+          REPOSITORY: saas-base
 
       - name: Synth
         working-directory: ./infrastructure
