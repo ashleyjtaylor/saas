@@ -66,11 +66,11 @@ jobs:
 
           # REPOSITORY_URI=${{ env.ECR_URI }}/base
 
-          # docker build -t $REPOSITORY_URI:latest -f ./images/Dockerfile.base .
+          # docker build -t $REPOSITORY_URI:latest -f ./src/images/Dockerfile.base .
           # docker tag base:latest $REPOSITORY_URI:latest
           # docker push $REPOSITORY_URI:latest
 
-          docker build -t $REGISTRY/$REPOSITORY:latest -f ./images/Dockerfile.base .
+          docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .
           docker push $REGISTRY/$REPOSITORY:latest
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
