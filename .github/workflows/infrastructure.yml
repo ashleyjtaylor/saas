@@ -13,6 +13,7 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/infrastructure.yml'
       - 'infrastructure/**'
       - '!**/*.md'
 
@@ -45,8 +46,8 @@ jobs:
 
       - name: Synth
         working-directory: ./infrastructure
-        run: cdk synth --require-approval never
+        run: npx cdk synth --require-approval never
 
       - name: Deploy
         working-directory: ./infrastructure
-        run: cdk deploy  --require-approval never
+        run: npx cdk deploy  --require-approval never
