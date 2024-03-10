@@ -9,16 +9,31 @@ permissions:
   contents: read
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/infrastructure.yml'
-      - 'infrastructure/**'
-      - '!**/*.md'
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        type: string
+        required: true
+        default: 'dev'
 
 jobs:
-  infrastructure:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            baseimage:
+              - 'infrastructure/src/images/Dockerfile.base'
+            infrastructure:
+              - '.github/workflows/infrastructure.yml'
+              - 'infrastructure/**'
+
+  tools:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,16 +42,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
+      
       - name: Install
         run: npm ci
-
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            images:
-              - '**/*/Dockerfile.base'
 
       - name: Build
         working-directory: ./infrastructure
@@ -56,7 +64,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       
       - name: Deploy base image
-        if: ${{ steps.filter.outputs.images == 'true' }}
+        if: ${{ needs.changes.outputs.files.baseimage == 'true' }}
         working-directory: ./infrastructure
         run: |
           aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
@@ -67,10 +75,44 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.BASE_IMAGE_NAME }}
 
-      - name: Synth
+      - name: Cdk Synth
         working-directory: ./infrastructure
         run: npx cdk synth --require-approval never
 
-      - name: Deploy
+      - name: Cdk Deploy
         working-directory: ./infrastructure
-        run: npx cdk deploy  --require-approval never
+        run: npx cdk deploy --require-approval never
+
+  dev:
+    if: ${{ needs.changes.outputs.files.infrastructure == 'true' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        working-directory: ./infrastructure
+        run: |
+          npm run lint
+          npm run build
+
+      - name: Assume OIDC Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/oidc-provider-role
+          role-session-name: gh-dev-deploy-session
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Synth
+        run: npx cdk synth Dev* --require-approval never
+
+      - name: Deploy
+        run: npx cdk deploy Dev* --require-approval never
