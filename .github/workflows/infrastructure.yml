@@ -9,15 +9,13 @@ permissions:
   contents: read
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        type: string
-        required: true
-        default: 'dev'
+  workflow_run:
+    workflows: [ci]
+    branches: [main]
+    types:
+      - completed
 
-  workflow_call:
+  workflow_dispatch:
     inputs:
       environment:
         description: 'Environment to deploy'
@@ -121,8 +119,8 @@ jobs:
       - name: Assume OIDC Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/oidc-provider-role
-          role-session-name: gh-dev-deploy-session
+          role-session-name: gh-dev-infrastructure-deploy-session
+          role-to-assume: ${{ env.OIDC_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Synth
