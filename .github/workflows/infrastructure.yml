@@ -47,7 +47,7 @@ jobs:
       - name: Assume OIDC Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # role-session-name: gh-infrastructure-deploy-session
+          role-session-name: gh-infrastructure-deploy-session
           role-to-assume: ${{ env.OIDC_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
       
@@ -59,6 +59,7 @@ jobs:
         if: ${{ steps.filter.outputs.images == 'true' }}
         working-directory: ./infrastructure
         run: |
+          aws sts get-caller-identity
           aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
 
           docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .
