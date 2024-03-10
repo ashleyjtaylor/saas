@@ -59,7 +59,6 @@ jobs:
         if: ${{ steps.filter.outputs.images == 'true' }}
         working-directory: ./infrastructure
         run: |
-          aws sts get-caller-identity
           aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
 
           docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .

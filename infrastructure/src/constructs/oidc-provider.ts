@@ -78,7 +78,7 @@ export default class OIDCProvider extends Construct {
                 'ecr:BatchCheckLayerAvailability',
                 'ecr:PutImage'
               ],
-              resources: [`arn:aws:ecr:::repository/${project}-*`],
+              resources: [`arn:aws:ecr:${Aws.REGION}:${Aws.ACCOUNT_ID}:repository/${project}-*`],
               effect: Effect.ALLOW
             })
           ]
