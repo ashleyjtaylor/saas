@@ -9,7 +9,6 @@ export default class ToolsStack extends Stack {
 
     new OIDCProvider(this, 'OIDCProvider', {
       project: 'saas',
-      issuer: 'token.actions.githubusercontent.com',
       roleName: 'saas-github-oidc-provider-role',
       githubRepo: 'ashleyjtaylor/saas'
     })

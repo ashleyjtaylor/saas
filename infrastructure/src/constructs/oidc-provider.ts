@@ -12,7 +12,6 @@ import {
 export interface OIDCProviderProps extends StackProps {
   project: string;
   roleName: string;
-  issuer: string;
   githubRepo: string;
 }
 
@@ -20,10 +19,10 @@ export default class OIDCProvider extends Construct {
   constructor(scope: Construct, id: string, props: OIDCProviderProps) {
     super(scope, id)
 
-    const { project, roleName, issuer, githubRepo } = props
+    const { project, roleName, githubRepo } = props
 
     const provider = new OpenIdConnectProvider(this, 'OIDCProvider', {
-      url: `https://${issuer}`,
+      url: 'https://token.actions.githubusercontent.com',
       clientIds: ['sts.amazonaws.com']
     })
 
@@ -32,10 +31,10 @@ export default class OIDCProvider extends Construct {
       description: 'Allow GitHub actions to connect to AWS',
       assumedBy: new WebIdentityPrincipal(provider.openIdConnectProviderArn, {
         StringLike: {
-          [`${issuer}:sub`]: `repo:${githubRepo}:*`
+          ['token.actions.githubusercontent.com:sub']: `repo:${githubRepo}:*`
         },
         StringEquals: {
-          [`${issuer}:aud`]: 'sts.amazonaws.com'
+          ['token.actions.githubusercontent.com:aud']: 'sts.amazonaws.com'
         }
       }),
       inlinePolicies: {
