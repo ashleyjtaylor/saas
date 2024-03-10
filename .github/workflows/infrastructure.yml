@@ -35,7 +35,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          base: HEAD
           filters: |
             baseimage:
               - 'infrastructure/src/images/Dockerfile.base'
