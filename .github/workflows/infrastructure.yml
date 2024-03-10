@@ -44,6 +44,7 @@ jobs:
               - 'infrastructure/**'
 
   tools:
+    if: ${{ needs.changes.outputs.files.infrastructure == 'true' }}
     needs: [changes]
     runs-on: ubuntu-latest
     steps:
