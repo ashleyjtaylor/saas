@@ -1,0 +1,25 @@
+name: deploy
+
+env:
+  NODE_VERSION: 20
+
+permissions: write-all
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  workflow_run:
+    workflows: [ci]
+    types:
+      - completed
+  
+jobs:
+  infrastructure:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: gh workflow run infrastructure.yml -f environment=dev
