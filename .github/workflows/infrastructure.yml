@@ -2,7 +2,7 @@ name: infrastructure
 
 env:
   NODE_VERSION: 20
-  OIDC_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/saas-github-oidc-provider-role
+  OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/saas-github-oidc-provider-role
 
 permissions:
   id-token: write
@@ -49,7 +49,7 @@ jobs:
         with:
           role-session-name: gh-infrastructure-deploy-session
           role-to-assume: ${{ env.OIDC_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
       
       - name: Login to Amazon ECR
         id: login-ecr
@@ -65,7 +65,7 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:latest
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: saas-base
+          REPOSITORY: ${{ vars.BASE_IMAGE_NAME }}
 
       - name: Synth
         working-directory: ./infrastructure

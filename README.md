@@ -13,7 +13,7 @@ This will create the following resources:
 
 | Resource    | Value | Description |
 | ----------- | ----------- | ----- |
-| IAM Role    | saas-github-oidc-provider-role | Assumed by GitHub Actions |
+| IAM Role    | `saas-github-oidc-provider-role` | Assumed by GitHub Actions |
 | ECR image   | `<AWS_ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com/saas-base:latest` | Contains common CLI tools |
 
 ---
@@ -24,13 +24,19 @@ CLI tools include: `node`, `aws-cli`, `git`, `jq`
 
 ### GitHub
 
+Add Repository Variables:
+
+| Variable        | Value |
+| -----------     | ----- |
+| BASE_IMAGE_NAME | `saas-base` |
+| AWS_ACCOUNT_ID  | `<AWS_ACCOUNT_ID>` |
+| AWS_REGION      | `<AWS_REGION>` |
+
 Add Repository Secrets:
 
 | Variable        | Value |
 | -----------     | ----- |
 | SONAR_TOKEN     | `<TOKEN>` |
-| AWS_ACCOUNT_ID  | `<AWS_ACCOUNT_ID>` |
-| AWS_REGION      | `<AWS_REGION>` |
 
 ---
 
