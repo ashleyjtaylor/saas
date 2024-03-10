@@ -7,6 +7,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  pull-requests: read
 
 on:
   workflow_run:
@@ -27,7 +28,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      files: ${{ steps.filter.outputs.changes }}
+      baseimage: ${{ steps.filter.outputs.baseimage }}
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +37,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: main
           filters: |
             baseimage:
               - 'infrastructure/src/images/Dockerfile.base'
@@ -43,7 +46,7 @@ jobs:
               - 'infrastructure/**'
 
   tools:
-    if: ${{ needs.changes.outputs.files.infrastructure == 'true' }}
+    if: ${{ needs.changes.outputs.infrastructure == 'true' }}
     needs: [changes]
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +78,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       
       - name: Deploy base image
-        if: ${{ needs.changes.outputs.files.baseimage == 'true' }}
+        if: ${{ needs.changes.outputs.baseimage == 'true' }}
         working-directory: ./infrastructure
         run: |
           aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
