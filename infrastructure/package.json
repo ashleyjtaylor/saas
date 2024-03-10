@@ -2,7 +2,7 @@
   "name": "infrastructure",
   "version": "0.0.1",
   "bin": {
-    "infrastructure": "bin/infrastructure.js"
+    "infrastructure": "dist/bin/app.js"
   },
   "scripts": {
     "lint": "eslint .",
