@@ -8,6 +8,7 @@
     "tsconfig.json",
     "tsconfig.cdk.json",
     "tsconfig.next.json",
+    "sonar-project.properties",
     "turbo.json"
   ],
   "pipeline": {
