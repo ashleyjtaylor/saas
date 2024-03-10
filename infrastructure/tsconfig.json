@@ -1,5 +1,8 @@
 {
   "extends": "../tsconfig.cdk.json",
-  "include": ["src"],
-  "exclude": ["cdk.out"]
+  "include": ["src", "bin"],
+  "exclude": ["cdk.out"],
+  "compilerOptions": {
+    "outDir": "dist"
+  }
 }
