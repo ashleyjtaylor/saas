@@ -2,6 +2,7 @@ name: deploy
 
 env:
   NODE_VERSION: 20
+  GH_TOKEN: ${{ github.token }}
 
 permissions: write-all
 
