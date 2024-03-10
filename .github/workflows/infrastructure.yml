@@ -98,7 +98,7 @@ jobs:
         run: npx cdk deploy --require-approval never
 
   dev:
-    if: ${{ needs.changes.outputs.files.infrastructure == 'true' || inputs.environment == 'dev' }}
+    if: ${{ needs.changes.outputs.infrastructure == 'true' || inputs.environment == 'dev' }}
     needs: [changes]
     runs-on: ubuntu-latest
     environment: dev
