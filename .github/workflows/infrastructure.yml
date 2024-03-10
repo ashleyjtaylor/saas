@@ -127,7 +127,9 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Synth
+        working-directory: ./infrastructure
         run: npx cdk synth Dev* --require-approval never
 
       - name: Deploy
+        working-directory: ./infrastructure
         run: npx cdk deploy Dev* --require-approval never
