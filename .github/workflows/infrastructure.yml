@@ -96,10 +96,10 @@ jobs:
         run: npx cdk deploy --require-approval never
 
   dev:
-    if: ${{ needs.changes.outputs.files.infrastructure == 'true' }}
+    if: ${{ needs.changes.outputs.files.infrastructure == 'true' || inputs.environment == 'dev' }}
     needs: [changes]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: dev
     steps:
       - uses: actions/checkout@v4
         with:
@@ -120,7 +120,7 @@ jobs:
       - name: Assume OIDC Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-session-name: gh-dev-infrastructure-deploy-session
+          role-session-name: dev-gh-infrastructure-deploy-session
           role-to-assume: ${{ env.OIDC_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
