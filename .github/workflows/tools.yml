@@ -9,13 +9,11 @@ permissions:
   contents: read
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/tools.yml'
-      - 'infrastructure/src/tools/**'
-      - '!**/*.md'
+  workflow_run:
+    workflows: ["ci"]
+    branches: [main]
+    types:
+      - completed
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -23,6 +21,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
       baseimage: ${{ steps.filter.outputs.baseimage }}
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +32,15 @@ jobs:
         with:
           base: main
           filters: |
+            infrastructure:
+              - '.github/workflows/tools.yml'
+              - 'infrastructure/src/tools/**'
+              - '!**/*.md'
             baseimage:
               - 'infrastructure/src/tools/images/Dockerfile.base'
 
   deploy:
+    if: ${{ needs.changes.outputs.infrastructure == 'true' }}
     needs: [changes]
     runs-on: ubuntu-latest
     steps:
