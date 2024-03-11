@@ -3,6 +3,8 @@ import { Peer, Port, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2'
 import { StringListParameter, StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Cluster } from 'aws-cdk-lib/aws-ecs'
 import { ApplicationLoadBalancer, ApplicationProtocol, ListenerAction } from 'aws-cdk-lib/aws-elasticloadbalancingv2'
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager'
+import { Aws } from 'aws-cdk-lib'
 
 interface ComputeProps {
   env: string;
@@ -14,6 +16,15 @@ export class Compute extends Construct {
     super(scope, id)
 
     const { env, project } = props
+
+    /**
+     * Temporary certificate
+     */
+    const certificate = Certificate.fromCertificateArn(
+      this,
+      'Certificate',
+      `arn:aws:acm:${Aws.REGION}:${Aws.ACCOUNT_ID}:certificate/8531a326-6016-45ba-ae56-d141c9ea45e4`
+    )
 
     /******************************
      * Vpc
@@ -56,13 +67,14 @@ export class Compute extends Construct {
       defaultAction: ListenerAction.redirect({ protocol:  ApplicationProtocol.HTTPS })
     })
 
-    // const httpsListener = loadBalancer.addListener('HTTPS', {
-    //   port: 443,
-    //   protocol: ApplicationProtocol.HTTPS,
-    //   defaultAction: ListenerAction.fixedResponse(503, {
-    //     messageBody: '503 Service Unavailable'
-    //   })
-    // })
+    const httpsListener = loadBalancer.addListener('HTTPS', {
+      port: 443,
+      protocol: ApplicationProtocol.HTTPS,
+      defaultAction: ListenerAction.fixedResponse(503, {
+        messageBody: '503 Service Unavailable'
+      }),
+      certificates: [certificate]
+    })
 
     /******************************
      * Parameter Store
@@ -97,9 +109,9 @@ export class Compute extends Construct {
       stringValue: cluster.clusterName
     })
 
-    // new StringParameter(this, 'LoadBalancerHttpsListenerArn', {
-    //   parameterName: `/${project}/${env}/loadBalancerHttpsListenerArn`,
-    //   stringValue: httpsListener.listenerArn
-    // })
+    new StringParameter(this, 'LoadBalancerHttpsListenerArn', {
+      parameterName: `/${project}/${env}/loadBalancerHttpsListenerArn`,
+      stringValue: httpsListener.listenerArn
+    })
   }
 }
