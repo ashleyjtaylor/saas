@@ -2,6 +2,7 @@ import { Construct } from 'constructs'
 import { Peer, Port, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2'
 import { StringListParameter, StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Cluster } from 'aws-cdk-lib/aws-ecs'
+import { ApplicationLoadBalancer, ApplicationProtocol, ListenerAction } from 'aws-cdk-lib/aws-elasticloadbalancingv2'
 
 interface ComputeProps {
   env: string;
@@ -41,6 +42,29 @@ export class Compute extends Construct {
     })
 
     /******************************
+     * Load Balancer
+     ******************************/
+    const loadBalancer = new ApplicationLoadBalancer(this, 'ApplicationLoadBalancer', {
+      vpc,
+      securityGroup,
+      loadBalancerName: `${project}-${env}-load-balancer`,
+      internetFacing: true
+    })
+
+    loadBalancer.addListener('HTTP', {
+      port: 80,
+      defaultAction: ListenerAction.redirect({ protocol:  ApplicationProtocol.HTTPS })
+    })
+
+    const httpsListener = loadBalancer.addListener('HTTPS', {
+      port: 443,
+      protocol: ApplicationProtocol.HTTPS,
+      defaultAction: ListenerAction.fixedResponse(503, {
+        messageBody: '503 Service Unavailable'
+      })
+    })
+
+    /******************************
      * Parameter Store
      ******************************/
     new StringParameter(this, 'VpcId', {
@@ -71,6 +95,11 @@ export class Compute extends Construct {
     new StringParameter(this, 'ClusterName', {
       parameterName: `/${project}/${env}/clusterName`,
       stringValue: cluster.clusterName
+    })
+
+    new StringParameter(this, 'LoadBalancerHttpsListenerArn', {
+      parameterName: `/${project}/${env}/loadBalancerHttpsListenerArn`,
+      stringValue: httpsListener.listenerArn
     })
   }
 }
