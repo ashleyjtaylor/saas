@@ -56,13 +56,13 @@ export class Compute extends Construct {
       defaultAction: ListenerAction.redirect({ protocol:  ApplicationProtocol.HTTPS })
     })
 
-    const httpsListener = loadBalancer.addListener('HTTPS', {
-      port: 443,
-      protocol: ApplicationProtocol.HTTPS,
-      defaultAction: ListenerAction.fixedResponse(503, {
-        messageBody: '503 Service Unavailable'
-      })
-    })
+    // const httpsListener = loadBalancer.addListener('HTTPS', {
+    //   port: 443,
+    //   protocol: ApplicationProtocol.HTTPS,
+    //   defaultAction: ListenerAction.fixedResponse(503, {
+    //     messageBody: '503 Service Unavailable'
+    //   })
+    // })
 
     /******************************
      * Parameter Store
@@ -97,9 +97,9 @@ export class Compute extends Construct {
       stringValue: cluster.clusterName
     })
 
-    new StringParameter(this, 'LoadBalancerHttpsListenerArn', {
-      parameterName: `/${project}/${env}/loadBalancerHttpsListenerArn`,
-      stringValue: httpsListener.listenerArn
-    })
+    // new StringParameter(this, 'LoadBalancerHttpsListenerArn', {
+    //   parameterName: `/${project}/${env}/loadBalancerHttpsListenerArn`,
+    //   stringValue: httpsListener.listenerArn
+    // })
   }
 }
