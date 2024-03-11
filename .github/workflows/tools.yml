@@ -73,7 +73,7 @@ jobs:
         run: |
           aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
 
-          docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .
+          docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/tools/images/Dockerfile.base .
           docker push $REGISTRY/$REPOSITORY:latest
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
