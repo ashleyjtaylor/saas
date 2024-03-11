@@ -1,0 +1,88 @@
+name: infrastructure-tools
+
+env:
+  NODE_VERSION: 20
+  OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/saas-github-oidc-provider-role
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tools.yml'
+      - 'infrastructure/src/tools/**'
+      - '!**/*.md'
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      baseimage: ${{ steps.filter.outputs.baseimage }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: main
+          filters: |
+            baseimage:
+              - 'infrastructure/src/tools/images/Dockerfile.base'
+
+  deploy:
+    needs: [changes]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        working-directory: ./infrastructure
+        run: |
+          npm run lint
+          npm run build
+
+      - name: Assume OIDC Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: gh-infrastructure-deploy-session
+          role-to-assume: ${{ env.OIDC_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Deploy base image
+        if: ${{ needs.changes.outputs.baseimage == 'true' }}
+        working-directory: ./infrastructure
+        run: |
+          aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
+
+          docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .
+          docker push $REGISTRY/$REPOSITORY:latest
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.BASE_IMAGE_NAME }}
+
+      - name: Cdk Synth
+        working-directory: ./infrastructure
+        run: npx cdk synth ToolsStack --require-approval never
+
+      - name: Cdk Deploy
+        working-directory: ./infrastructure
+        run: npx cdk deploy ToolsStack --require-approval never
