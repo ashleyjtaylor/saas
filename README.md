@@ -1,6 +1,7 @@
 # SaaS
 
 ![CI](https://github.com/ashleyjtaylor/saas/actions/workflows/ci.yml/badge.svg)
+![Tools](https://github.com/ashleyjtaylor/saas/actions/workflows/tools.yml/badge.svg)
 ![Infrastructure](https://github.com/ashleyjtaylor/saas/actions/workflows/infrastructure.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ashleyjtaylor_saas&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ashleyjtaylor_saas)
 

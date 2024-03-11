@@ -9,13 +9,11 @@ permissions:
   contents: read
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/infrastructure.yml'
-      - 'infrastructure/src/env/**'
-      - '!**/*.md'
+  workflow_run:
+    workflows: ["ci"]
+    branches: [main]
+    types:
+      - completed
 
   workflow_dispatch:
     inputs:
@@ -25,8 +23,30 @@ on:
         required: true
         default: 'dev'
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: main
+          filters: |
+            infrastructure:
+              - '.github/workflows/infrastructure.yml'
+              - 'infrastructure/src/env/**'
+              - '!**/*.md'
+
   dev:
+    if: ${{ needs.changes.outputs.infrastructure == 'true' }}
+    needs: [changes]
     runs-on: ubuntu-latest
     environment: dev
     steps:
