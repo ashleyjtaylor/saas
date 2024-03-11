@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
 import * as cdk from 'aws-cdk-lib'
-import ToolsStack from '../src/ToolsStack'
+import ToolsStack from '../src/tools/ToolsStack'
 
 const app = new cdk.App()
 

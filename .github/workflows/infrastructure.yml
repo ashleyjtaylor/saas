@@ -1,4 +1,4 @@
-name: infrastructure
+name: infrastructure-env
 
 env:
   NODE_VERSION: 20
@@ -7,99 +7,26 @@ env:
 permissions:
   id-token: write
   contents: read
-  pull-requests: read
 
 on:
-  workflow_run:
-    workflows: [ci]
-    branches: [main]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/infrastructure.yml'
+      - 'infrastructure/src/env/**'
+      - '!**/*.md'
 
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
-        type: string
+        description: 'Environment to deploy: [dev]'
+        type: environment
         required: true
         default: 'dev'
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      baseimage: ${{ steps.filter.outputs.baseimage }}
-      infrastructure: ${{ steps.filter.outputs.infrastructure }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          base: main
-          filters: |
-            baseimage:
-              - 'infrastructure/src/images/Dockerfile.base'
-            infrastructure:
-              - '.github/workflows/infrastructure.yml'
-              - 'infrastructure/**'
-
-  tools:
-    if: ${{ needs.changes.outputs.infrastructure == 'true' }}
-    needs: [changes]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        working-directory: ./infrastructure
-        run: |
-          npm run lint
-          npm run build
-
-      - name: Assume OIDC Role
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-session-name: gh-infrastructure-deploy-session
-          role-to-assume: ${{ env.OIDC_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-      
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-      
-      - name: Deploy base image
-        if: ${{ needs.changes.outputs.baseimage == 'true' }}
-        working-directory: ./infrastructure
-        run: |
-          aws ecr describe-repositories --repository-names $REPOSITORY || aws ecr create-repository --repository-name $REPOSITORY
-
-          docker build -t $REGISTRY/$REPOSITORY:latest -f ./src/images/Dockerfile.base .
-          docker push $REGISTRY/$REPOSITORY:latest
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ vars.BASE_IMAGE_NAME }}
-
-      - name: Cdk Synth
-        working-directory: ./infrastructure
-        run: npx cdk synth --require-approval never
-
-      - name: Cdk Deploy
-        working-directory: ./infrastructure
-        run: npx cdk deploy --require-approval never
-
   dev:
-    if: ${{ needs.changes.outputs.infrastructure == 'true' || inputs.environment == 'dev' }}
-    needs: [changes]
     runs-on: ubuntu-latest
     environment: dev
     steps:
