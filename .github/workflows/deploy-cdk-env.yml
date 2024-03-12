@@ -23,8 +23,6 @@ on:
         required: true
         default: 'dev'
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
-
 jobs:
   changes:
     runs-on: ubuntu-latest
