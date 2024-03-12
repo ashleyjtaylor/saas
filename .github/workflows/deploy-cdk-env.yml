@@ -1,4 +1,4 @@
-name: infrastructure-env
+name: deploy-cdk-env
 
 env:
   NODE_VERSION: 20

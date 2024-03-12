@@ -1,4 +1,4 @@
-name: infrastructure-tools
+name: deploy-cdk-tools
 
 env:
   NODE_VERSION: 20
@@ -9,11 +9,7 @@ permissions:
   contents: read
 
 on:
-  workflow_run:
-    workflows: ["ci"]
-    branches: [main]
-    types:
-      - completed
+  workflow_call:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
