@@ -29,7 +29,7 @@ jobs:
           base: main
           filters: |
             infrastructure:
-              - '.github/workflows/tools.yml'
+              - '.github/workflows/deploy-cdk-tools.yml'
               - 'infrastructure/src/tools/**'
               - '!**/*.md'
             baseimage:
