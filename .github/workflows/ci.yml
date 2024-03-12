@@ -4,6 +4,7 @@ env:
   NODE_VERSION: 20
 
 permissions:
+  id-token: write
   contents: read
 
 on:
