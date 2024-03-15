@@ -6,6 +6,17 @@
 
 ## Pre-requisites
 
+### DNS
+
+A couple of steps to set some base resources for the main domain.
+
+- Add the `HostedZone` for the root domain: `example.com`
+- Create a `Certificate` for the domain and add its record to `Route53`
+
+(Note: `prod` is done manual to keep the NS records the same and to not accidentally delete `prod` DNS via code)
+
+### Resources
+
 An initial infrastructure `cdk deploy` is required to get some global resources deployed.
 
 ```bash

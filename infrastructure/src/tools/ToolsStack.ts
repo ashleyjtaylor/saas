@@ -7,8 +7,10 @@ export default class ToolsStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props)
 
+    const project = 'saas'
+
     new OIDCProvider(this, 'OIDCProvider', {
-      project: 'saas',
+      project,
       roleName: 'saas-github-oidc-provider-role',
       githubRepo: 'ashleyjtaylor/saas'
     })
